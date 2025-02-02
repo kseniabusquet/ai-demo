@@ -10,6 +10,10 @@ A Clojure-based pipeline that:
 
 ---
 
+## WIP: print usage statistics
+
+---
+
 ## Table of Contents
 
 - [Prerequisites](#prerequisites)
