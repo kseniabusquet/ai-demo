@@ -7,35 +7,7 @@
    [clojure.string :as str]))
 
 (def openai-api-url "https://api.openai.com/v1")
-(def video-folder "/home/kseniabusquet/repos/ai-demo/src/videos/")
-#_(def usage-stats (atom {:prompt-tokens 0
-                        :completion-tokens 0
-                        :total-tokens 0}))
-
-#_(defn update-usage [{:keys [usage]}]
-  (when usage
-    (swap! usage-stats update :prompt-tokens + (get usage :prompt_tokens 0))
-    (swap! usage-stats update :completion-tokens + (get usage :completion_tokens 0))
-    (swap! usage-stats update :total-tokens + (get usage :total_tokens 0))))
-
-#_(defn print-usage-stats!
-  "Calculates total tokens and cost for GPT-3.5 (approx).
-   GPT-3.5 has different rates for prompts vs completions."
-  []
-  (let [{:keys [prompt-tokens completion-tokens total-tokens]} @usage-stats
-        ;; For GPT-3.5 or 4-o-mini:
-        ;;   prompt = $0.0015 / 1000 tokens
-        ;;   completion = $0.0020 / 1000 tokens
-        cost-prompt     (* prompt-tokens 0.0015 (/ 1 1000.0))
-        cost-completion (* completion-tokens 0.0020 (/ 1 1000.0))
-        total-cost      (+ cost-prompt cost-completion)]
-    (prn "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
-    (prn "GPT Usage Summary:")
-    (prn "  Prompt tokens:    " prompt-tokens)
-    (prn "  Completion tokens:" completion-tokens)
-    (prn "  Total tokens:     " total-tokens)
-    (prn (format "Estimated cost (USD): $%.4f" total-cost))
-    (prn "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")))
+(def video-folder "/mnt/e/")
 
 (defn humanize-ms
   "Convert a duration in milliseconds to a human-readable string.
@@ -85,7 +57,6 @@
               :as        :json}
         response (http/post url opts)
         body     (:body response)]
-    #_(update-usage body)
     (if-let [error (:error body)]
       (throw (ex-info "Failed to transcribe audio" {:error error}))
       (:text body))))
@@ -115,7 +86,6 @@
                                               :temperature 0.7
                                               :max_tokens  1500})
                                    :as      :json})]
-    #_(update-usage body)
     (if-let [error (:error body)]
       (throw (ex-info "Failed to summarize transcript" {:error error}))
       (-> body
@@ -206,5 +176,4 @@
       (prn "------------------")
       (System/exit 1))
     (process-videos-parallel (str video-folder folder-path))
-    #_(print-usage-stats!)
     (System/exit 0)))
